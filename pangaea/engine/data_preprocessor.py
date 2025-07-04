@@ -239,52 +239,60 @@ class BandPadding(BasePreprocessor):
         self, data: dict[str, torch.Tensor | dict[str, torch.Tensor]]
     ) -> dict[str, torch.Tensor | dict[str, torch.Tensor]]:
         for k in self.avail_bands_mask.keys():
-            if k in self.used_bands_indices.keys():
-                size = self.avail_bands_mask[k].shape + data["image"][k].shape[1:]
-                padded_image = torch.full(
-                    size, fill_value=self.fill_value, dtype=data["image"][k].dtype
-                )
-                padded_image[self.avail_bands_mask[k]] = data["image"][k][
-                    self.used_bands_indices[k]
-                ]
-            else:
-                reference = data["image"](list(data["image"].keys())[0])
-                size = self.avail_bands_mask[k].shape + reference.shape[1:]
-                padded_image = torch.full(
-                    size, fill_value=self.fill_value, dtype=reference.dtype
-                )
+            # if not all bands for a specific sensor are not false, (e.g. 'sar': tensor([False, False]))
+            if not (~self.avail_bands_mask[k]).all():
+                if k in self.used_bands_indices.keys():
+                    size = self.avail_bands_mask[k].shape + data["image"][k].shape[1:]
+                    padded_image = torch.full(
+                        size, fill_value=self.fill_value, dtype=data["image"][k].dtype
+                    )
+                    padded_image[self.avail_bands_mask[k]] = data["image"][k][
+                        self.used_bands_indices[k]
+                    ]
+                else:
+                    reference = data["image"](list(data["image"].keys())[0])
+                    size = self.avail_bands_mask[k].shape + reference.shape[1:]
+                    padded_image = torch.full(
+                        size, fill_value=self.fill_value, dtype=reference.dtype
+                    )
 
-            data["image"][k] = padded_image
+                data["image"][k] = padded_image
         return data
 
     def update_meta(self, meta):
         """Tracking the meta statistics/info for next processor."""
         meta["data_bands"] = meta["encoder_bands"]
+        # self.avail_bands_mask = {'optical': tensor([False,  True,  True,  True, False, False, False, False,  True, False, True,  True]),
+        #                          'sar': tensor([False, False])}
+        # self.used_bands_indices= {'optical': tensor([0, 1, 2, 3, 4, 5])}
+        # breakpoint()
         for k in self.avail_bands_mask.keys():
-            size = self.avail_bands_mask[k].shape
-            meta["data_mean"][k] = torch.full(
-                size, fill_value=self.fill_value, dtype=torch.float
-            )
-            meta["data_std"][k] = torch.ones(size, dtype=torch.float)
-            meta["data_min"][k] = torch.full(
-                size, fill_value=self.fill_value, dtype=torch.float
-            )
-            meta["data_max"][k] = torch.full(
-                size, fill_value=self.fill_value, dtype=torch.float
-            )
-            if self.used_bands_indices[k] is not None:
-                meta["data_mean"][k][self.avail_bands_mask[k]] = meta["data_mean"][k][
-                    self.used_bands_indices[k]
-                ]
-                meta["data_std"][k][self.avail_bands_mask[k]] = meta["data_std"][k][
-                    self.used_bands_indices[k]
-                ]
-                meta["data_min"][k][self.avail_bands_mask[k]] = meta["data_min"][k][
-                    self.used_bands_indices[k]
-                ]
-                meta["data_max"][k][self.avail_bands_mask[k]] = meta["data_max"][k][
-                    self.used_bands_indices[k]
-                ]
+            # if not all bands for a specific sensor are not false, (e.g. 'sar': tensor([False, False]))
+            if not (~self.avail_bands_mask[k]).all():
+                size = self.avail_bands_mask[k].shape
+                meta["data_mean"][k] = torch.full(
+                    size, fill_value=self.fill_value, dtype=torch.float
+                )
+                meta["data_std"][k] = torch.ones(size, dtype=torch.float)
+                meta["data_min"][k] = torch.full(
+                    size, fill_value=self.fill_value, dtype=torch.float
+                )
+                meta["data_max"][k] = torch.full(
+                    size, fill_value=self.fill_value, dtype=torch.float
+                )
+                if self.used_bands_indices[k] is not None:
+                    meta["data_mean"][k][self.avail_bands_mask[k]] = meta["data_mean"][k][
+                        self.used_bands_indices[k]
+                    ]
+                    meta["data_std"][k][self.avail_bands_mask[k]] = meta["data_std"][k][
+                        self.used_bands_indices[k]
+                    ]
+                    meta["data_min"][k][self.avail_bands_mask[k]] = meta["data_min"][k][
+                        self.used_bands_indices[k]
+                    ]
+                    meta["data_max"][k][self.avail_bands_mask[k]] = meta["data_max"][k][
+                        self.used_bands_indices[k]
+                    ]
         return meta
 
 

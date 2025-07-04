@@ -146,8 +146,8 @@ def main(cfg: DictConfig) -> None:
             decoder.module.model_name, type(encoder).__name__
         )
     )
-
-    modalities = list(encoder.input_bands.keys())
+    # use as accepted modalities for the collate_fn the intersection of encoder & dataset bands
+    modalities = list(encoder.input_bands.keys() & cfg.dataset.bands.keys())
     collate_fn = get_collate_fn(modalities)
 
     # training
