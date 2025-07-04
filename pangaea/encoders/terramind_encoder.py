@@ -2738,21 +2738,12 @@ def build_terrammind_vit(
         if loaded_keys.unexpected_keys:
             logger.warning(f"Missing keys in encoder_weights {encoder_weights}: {loaded_keys.missing_keys}")
 
-    # elif pretrained:
-    #     # Load model from Hugging Face
-    #     state_dict_file = hf_hub_download(repo_id=pretrained_weights[variant]['hf_hub_id'],
-    #                                       filename=pretrained_weights[variant]['hf_hub_filename'])
-    #     state_dict = torch.load(state_dict_file, map_location="cpu", weights_only=True)
-    #     state_dict = checkpoint_filter_fn_vit(state_dict, model)
-    #     model.load_state_dict(state_dict, strict=True)
-
     if bands is not None:
         model = select_modality_patch_embed_weights(model, bands, pretrained_bands)
 
     return model
 
 
-# @TERRATORCH_BACKBONE_REGISTRY.register
 def terramind_v1_base(**kwargs):
     model = build_terrammind_vit(
         variant='terramind_v1_base',
@@ -2789,44 +2780,6 @@ def terramind_v1_large(**kwargs):
     )
     return model
 
-
-# # @TERRATORCH_BACKBONE_REGISTRY.register
-# def terramind_v01_base(**kwargs):
-#     model = build_terrammind_vit(
-#         variant='terramind_v01_base',
-#         encoder_depth=12,
-#         dim=768,
-#         num_heads=12,
-#         mlp_ratio=4,
-#         qkv_bias=False,
-#         proj_bias=False,
-#         mlp_bias=False,
-#         norm_layer=partial(LayerNorm, eps=1e-6, bias=False),
-#         act_layer=nn.SiLU,
-#         gated_mlp=True,
-#         pretrained_bands={'untok_sen2l2a@224': PRETRAINED_BANDS['untok_sen2l2a@224']},
-#         **kwargs
-#     )
-#     return model
-
-# def terramind_v1_large_experimental_500b(**kwargs):
-#     model = build_terrammind_vit(
-#         variant='terramind_v1_large_experimental_500b',
-#         encoder_depth=24,
-#         dim=1024,
-#         num_heads=16,
-#         mlp_ratio=4,
-#         qkv_bias=False,
-#         proj_bias=False,
-#         mlp_bias=False,
-#         norm_layer=partial(LayerNorm, eps=1e-6, bias=False),
-#         act_layer=nn.SiLU,
-#         gated_mlp=True,
-#         pretrained_bands=PRETRAINED_BANDS,
-#         **kwargs
-#     )
-#     return model
-
-# if __name__ == "__main__":
-#     vit = terramind_v1_base()
-#     print(vit.mod_name_mapping)
+# Code for loading the model directly from terratorch BACKBONE_REGISTRY
+# from terratorch import BACKBONE_REGISTRY
+# model = BACKBONE_REGISTRY.build('terramind_v1_large', pretrained=True, modalities=['S2L2A', 'S1GRD'])
