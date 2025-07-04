@@ -36,15 +36,25 @@ def get_collate_fn(modalities: list[str]) -> Callable:
                         batch[i]["image"][modality] = F.pad(
                             x["image"][modality], padding, "constant", 0
                         )
-
-        # stack all images and targets
+        # s2_dates = []
+        # # collect s2_dates from all samples
+        # for sample in batch:
+        #     if "s2_dates" in sample:
+        #         s2_dates.append(sample["s2_dates"])
+        #     else:
+        #         s2_dates.append(None)
+        # # stack all images and targets
+        print("XXX:", torch.stack([torch.tensor(x["s2_dates"]) for x in batch if "s2_dates" in x]).shape)
+        print("target_shape", torch.stack([x["target"] for x in batch]).shape)
+        [print(x["target"].shape) for x in batch]        
         return {
             "image": {
                 modality: torch.stack([x["image"][modality] for x in batch])
                 for modality in modalities
             },
             "target": torch.stack([x["target"] for x in batch]),
-            "metadata": [sample["metadata"] for sample in batch]
+            "metadata": [sample["metadata"] for sample in batch],
+            "s2_dates": torch.stack([torch.tensor(x["s2_dates"]) for x in batch if "s2_dates" in x]).unsqueeze(0)
         }
 
     return collate_fn

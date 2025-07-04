@@ -13,7 +13,7 @@ from sklearn.model_selection import train_test_split
 
 from pangaea.datasets.base import RawGeoFMDataset
 from pangaea.datasets.utils import DownloadProgressBar
-
+import re
 
 class HLSBurnScars(RawGeoFMDataset):
     def __init__(
@@ -151,6 +151,7 @@ class HLSBurnScars(RawGeoFMDataset):
         return len(self.image_list)
 
     def __getitem__(self, index):
+        image_path = self.image_list[index]
         image = tiff.imread(self.image_list[index])
         image = image.astype(np.float32)  # Convert to float32
         image = torch.from_numpy(image).permute(2, 0, 1)
@@ -159,17 +160,26 @@ class HLSBurnScars(RawGeoFMDataset):
         target = target.astype(np.int64)  # Convert to int64 (since it's a mask)
         target = torch.from_numpy(target).long()
 
+        
+        match = re.search(r'\.(\d{7})\.', image_path)
+        doy = None
+        if match:
+            doy = int(match.group(1)[4:])
+
         invalid_mask = image == 9999
         image[invalid_mask] = 0
 
         # images must have (C T H W) shape
         image = image.unsqueeze(1)
+        print(f"Image shape: {image.shape}, Target shape: {target.shape}")
+        print(f"DOY: {doy}")
         output = {
             "image": {
                 "optical": image,
             },
             "target": target,
             "metadata": {},
+            "s2_dates": doy,
         }
 
         return output

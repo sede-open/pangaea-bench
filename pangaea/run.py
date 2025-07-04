@@ -74,7 +74,8 @@ def main(cfg: DictConfig) -> None:
     device = torch.device("cuda", local_rank)
 
     torch.cuda.set_device(device)
-    torch.distributed.init_process_group(backend="nccl")
+    # torch.distributed.init_process_group(backend="nccl")
+    torch.distributed.init_process_group(backend="gloo", init_method="env://")
 
     # true if training else false
     train_run = cfg.train

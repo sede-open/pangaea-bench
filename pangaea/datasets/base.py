@@ -190,6 +190,5 @@ class GeoFMDataset(Dataset):
         output = self.raw_dataset[i // self.replicate]
         if self.preprocessor is not None:
             output = self.preprocessor(output)
-
         return output
 

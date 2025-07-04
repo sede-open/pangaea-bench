@@ -122,7 +122,6 @@ class Preprocessor(BasePreprocessor):
         self.check_dimension(data)
         for process in self.preprocessor:
             data = process(data)
-
         return data
 
 
