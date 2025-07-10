@@ -27,6 +27,6 @@ evaluator:
   device: null
   use_wandb: ${use_wandb}
   inference_mode: sliding
-  sliding_inference_batch: 8
+  sliding_inference_batch: 1
 
 

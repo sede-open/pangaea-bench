@@ -171,8 +171,9 @@ class HLSBurnScars(RawGeoFMDataset):
 
         # images must have (C T H W) shape
         image = image.unsqueeze(1)
-        print(f"Image shape: {image.shape}, Target shape: {target.shape}")
-        print(f"DOY: {doy}")
+        # print(f"Image shape: {image.shape}, Target shape: {target.shape}")
+        # print(f"DOY: {doy}")
+        
         output = {
             "image": {
                 "optical": image,

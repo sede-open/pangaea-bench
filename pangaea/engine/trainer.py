@@ -133,7 +133,6 @@ class Trainer:
         for batch_idx, data in enumerate(self.train_loader):
             image, target = data["image"], data["target"]
             image = {modality: value.to(self.device) for modality, value in image.items()}
-            print("SSSS", data['s2_dates'])
             image['s2_dates'] = data['s2_dates'].to(self.device)
             
             target = target.to(self.device)

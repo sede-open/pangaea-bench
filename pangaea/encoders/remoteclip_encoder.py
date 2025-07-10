@@ -491,4 +491,6 @@ class RemoteCLIP_Encoder(Encoder):
             for out in output
         ]
 
+        print(f"Output shape ENCODER: {[o.shape for o in output]}")
+
         return output

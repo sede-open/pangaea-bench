@@ -7,7 +7,6 @@ use_wandb: false
 num_workers: 1
 batch_size: 8
 
-
 # EXPERIMENT
 use_final_ckpt: false
 finetune: false

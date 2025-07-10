@@ -17,8 +17,8 @@ class AnySat_Encoder(Encoder):
         output_dim: int,
         output_layers: int | list[int],
         download_url: str = "",
-        patch_size: int = 10,        
-        output_type: str = "tile",
+        patch_size: int = 24,        
+        output_type: str = "patch",
         output_modality: str = None,
         embed_dim: int = 768,
         multi_temporal: bool = False,
@@ -44,6 +44,7 @@ class AnySat_Encoder(Encoder):
         self.output_modality = output_modality
         # Load pretrained AnySat model
         self.model = torch.hub.load('gastruc/anysat', 'anysat', pretrained=True, flash_attn=False)
+        # self.model.patch_size = self.patch_size
 
         # Freeze model if needed
         self._frozen = False
@@ -54,8 +55,7 @@ class AnySat_Encoder(Encoder):
         Accepts a dictionary of inputs (e.g., {"s2": tensor, "s2_dates": tensor}).
         Returns a list of feature maps from specified output layers.
         """
-        # print("image shape:", image["optical"].shape)
-        print("image dates:", image['s2_dates'])
+
         if "optical" in image.keys():
             # replace that to s2
             data = {}
@@ -65,18 +65,24 @@ class AnySat_Encoder(Encoder):
             data["s2_dates"] = image["s2_dates"]
         else: 
             data = image
-        print(data.keys())
-        print("image shape:", data["s2"].shape)
+        
+        if data["s2_dates"].shape[0] == 0:
+            data["s2_dates"] = torch.zeros(data["s2"].shape[0], dtype=torch.int64).to(data["s2"].device)
+        
         # colapse time dimension if not multi-temporal
         # if self.multi_temporal and image["optical"].ndim == 5:
         if self.output_type == "dense" and self.output_modality is not None:
             features = self.model(data, patch_size=self.patch_size, output=self.output_type, output_modality=self.output_modality)
         else:
-            features = self.model(data, patch_size=self.patch_size, output=self.output_type)
+            features = self.model(data, scale=30, patch_size=self.patch_size, output=self.output_type)
         
         if not isinstance(features, list):
+
             features = [features]
         
+        # Change the dimension order of feature data to [batch, channels, height, width]
+        features = [f.permute(0, 3, 1, 2).contiguous() for f in features]
+
         return features
 
         # features = self.model(image, patch_size=self.patch_size)

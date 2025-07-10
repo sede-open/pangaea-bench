@@ -821,6 +821,7 @@ class PPM(nn.ModuleList):
         """Forward function."""
         ppm_outs = []
         for ppm in self:
+            print(f"x shape: {x.shape}")
             ppm_out = ppm(x)
             upsampled_ppm_out = F.interpolate(
                 ppm_out,
@@ -887,7 +888,6 @@ class Feature2Pyramid(nn.Module):
     def forward(self, inputs):
         assert len(inputs) == len(self.rescales)
         outputs = []
-
         for i in range(len(inputs)):
             outputs.append(self.ops[i](inputs[i]))
         return tuple(outputs)

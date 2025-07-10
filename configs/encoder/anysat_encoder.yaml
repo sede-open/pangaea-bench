@@ -3,16 +3,20 @@ encoder_weights: ./pretrained_models/AnySat.pt
 download_url: https://huggingface.co/g-astruc/AnySat/resolve/main/AnySat.pt?download=true
 embed_dim: 768
 input_size: 224
+patch_size: 100
 
 input_bands:
   optical:
     - B2
     - B3
     - B4
+    - B5
+    - B6
+    - B7
+    - B8
     - B8A
     - B11
     - B12
-
 output_layers:
 - 0
 output_dim: 768

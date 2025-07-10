@@ -74,8 +74,8 @@ def main(cfg: DictConfig) -> None:
     device = torch.device("cuda", local_rank)
 
     torch.cuda.set_device(device)
-    # torch.distributed.init_process_group(backend="nccl")
-    torch.distributed.init_process_group(backend="gloo", init_method="env://")
+    torch.distributed.init_process_group(backend="nccl")
+    # torch.distributed.init_process_group(backend="gloo", init_method="env://")
 
     # true if training else false
     train_run = cfg.train
@@ -222,10 +222,28 @@ def main(cfg: DictConfig) -> None:
             collate_fn=collate_fn,
         )
 
+        # for btch in train_loader:
+        #     print("batch size:", btch["image"]['optical'].shape)
+
+        # val_sampler = DistributedSampler(val_dataset, shuffle=False, drop_last=False)
+        # val_loader = DataLoader(
+        #     val_dataset,
+        #     sampler=val_sampler,
+        #     batch_size=cfg.test_batch_size,
+        #     num_workers=cfg.test_num_workers,
+        #     pin_memory=True,
+        #     persistent_workers=False,
+        #     worker_init_fn=seed_worker,
+        #     collate_fn=collate_fn,
+        # )
+        # print("batch size:", cfg.batch_size)
+        # print("test batch size:", cfg.test_batch_size)
+        
         val_loader = DataLoader(
             val_dataset,
             sampler=DistributedSampler(val_dataset),
-            batch_size=cfg.test_batch_size,
+            # batch_size=cfg.test_batch_size,
+            batch_size=cfg.batch_size,
             num_workers=cfg.test_num_workers,
             pin_memory=True,
             persistent_workers=False,
@@ -234,6 +252,9 @@ def main(cfg: DictConfig) -> None:
             drop_last=False,
             collate_fn=collate_fn,
         )
+        
+        # for btch in val_loader:
+        #     print("batch size:", btch["image"]['optical'].shape)
 
         criterion = instantiate(cfg.criterion)
         optimizer = instantiate(cfg.optimizer, params=decoder.parameters())
@@ -286,6 +307,9 @@ def main(cfg: DictConfig) -> None:
         drop_last=False,
         collate_fn=collate_fn,
     )
+
+    for btch in test_loader:
+        print("batch size:", btch["image"]['optical'].shape)
     test_evaluator: Evaluator = instantiate(
         cfg.task.evaluator, val_loader=test_loader, exp_dir=exp_dir, device=device
     )
