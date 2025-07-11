@@ -74,7 +74,7 @@ class AnySat_Encoder(Encoder):
         if self.output_type == "dense" and self.output_modality is not None:
             features = self.model(data, patch_size=self.patch_size, output=self.output_type, output_modality=self.output_modality)
         else:
-            features = self.model(data, scale=30, patch_size=self.patch_size, output=self.output_type)
+            features = self.model(data, patch_size=self.patch_size, output=self.output_type)
         
         if not isinstance(features, list):
 
