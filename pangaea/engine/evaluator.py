@@ -105,7 +105,7 @@ class Evaluator:
         num_crops_per_img = h * w
 
         for k, v in img.items():
-            if k  == "s2_dates":
+            if k  == "hls_dates":
                 continue
             img_crops = []
             for i in range(h):
@@ -183,8 +183,7 @@ class LinearClassificationEvaluator(Evaluator):
             image, target = data["image"], data["target"]
             image = {k: v.to(self.device) for k, v in image.items()}
             target = target.to(self.device)
-            print("s2_dates:", data["s2_dates"])
-            image['s2_dates'] = data['s2_dates'].to(self.device)
+            image['hls_dates'] = data['hls_dates'].to(self.device)
             with torch.no_grad():
                 logits = model(image)
             
@@ -438,7 +437,7 @@ class SegEvaluator(Evaluator):
             image, target = data["image"], data["target"]
             image = {k: v.to(self.device) for k, v in image.items()}
             target = target.to(self.device)
-            image['s2_dates'] = data['s2_dates']
+            image['hls_dates'] = data['hls_dates']
             if self.inference_mode == "sliding":
                 input_size = model.module.encoder.input_size
                 logits = self.sliding_inference(model, image, input_size, output_shape=target.shape[-2:],
@@ -621,7 +620,7 @@ class RegEvaluator(Evaluator):
 
         for batch_idx, data in enumerate(tqdm(self.val_loader, desc=tag)):
             image, target = data['image'], data['target']
-            image['s2_dates'] = data['s2_dates']
+            image['hls_dates'] = data['hls_dates']
             image = {k: v.to(self.device) for k, v in image.items()}
             target = target.to(self.device)
 

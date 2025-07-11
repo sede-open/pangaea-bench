@@ -48,7 +48,7 @@ def get_collate_fn(modalities: list[str]) -> Callable:
             },
             "target": torch.stack([x["target"] for x in batch]),
             "metadata": [sample["metadata"] for sample in batch],
-            "s2_dates": torch.tensor([x["s2_dates"] for x in batch]), #torch.stack([torch.tensor(x["s2_dates"]) for x in batch if "s2_dates" in x])
+            "hls_dates": torch.tensor([x["hls_dates"] for x in batch]), #torch.stack([torch.tensor(x["s2_dates"]) for x in batch if "s2_dates" in x])
         }
 
     return collate_fn

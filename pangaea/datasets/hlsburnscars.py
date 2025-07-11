@@ -180,7 +180,7 @@ class HLSBurnScars(RawGeoFMDataset):
             },
             "target": target,
             "metadata": {},
-            "s2_dates": doy,
+            "hls_dates": doy,
         }
 
         return output

@@ -2,6 +2,13 @@ import torch
 import torch.nn as nn
 from pangaea.encoders.base import Encoder
 from logging import Logger
+import sys
+import os
+
+sys.path.append(os.path.abspath("/home/sghiassi/pangaea-bench/AnySat"))
+from AnySat.hubconf import AnySat
+
+
 
 class AnySat_Encoder(Encoder):
     """
@@ -43,9 +50,9 @@ class AnySat_Encoder(Encoder):
         self.output_type = output_type
         self.output_modality = output_modality
         # Load pretrained AnySat model
-        self.model = torch.hub.load('gastruc/anysat', 'anysat', pretrained=True, flash_attn=False)
+        # self.model = torch.hub.load('gastruc/anysat', 'anysat', pretrained=True, flash_attn=False)
         # self.model.patch_size = self.patch_size
-
+        self.model = AnySat.from_pretrained('base', flash_attn=False)
         # Freeze model if needed
         self._frozen = False
 
@@ -59,15 +66,15 @@ class AnySat_Encoder(Encoder):
         if "optical" in image.keys():
             # replace that to s2
             data = {}
-            data["s2"] = image["optical"]
+            data["hls"] = image["optical"]
             # expand dim to [batch, time, channels, height, width]
-            data["s2"] = data["s2"].unsqueeze(1)  # add time dimension
-            data["s2_dates"] = image["s2_dates"]
+            data["hls"] = data["hls"].unsqueeze(1)  # add time dimension
+            data["hls_dates"] = image["hls_dates"]
         else: 
             data = image
         
-        if data["s2_dates"].shape[0] == 0:
-            data["s2_dates"] = torch.zeros(data["s2"].shape[0], dtype=torch.int64).to(data["s2"].device)
+        if data["hls_dates"].shape[0] == 0:
+            data["hls_dates"] = torch.zeros(data["hls"].shape[0], dtype=torch.int64).to(data["hls"].device)
         
         # colapse time dimension if not multi-temporal
         # if self.multi_temporal and image["optical"].ndim == 5:
